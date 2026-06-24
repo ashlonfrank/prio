@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #111;
+    color: #c8c8c8;
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main {
+    max-width: 480px;
+    width: 100%;
+    padding: 2rem;
+  }
+
+  .date {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 3rem;
+  }
+
+  h2 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #777;
+    margin-bottom: 1.25rem;
+  }
+
+  #priorities {
+    list-style: none;
+    margin-bottom: 1rem;
+  }
+
+  #priorities li {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #1e1e1e;
+    font-size: 0.85rem;
+    cursor: grab;
+    user-select: none;
+  }
+
+  #priorities li.dragging {
+    opacity: 0.3;
+  }
+
+  #priorities li .drag-handle {
+    color: #333;
+    margin-right: 0.6rem;
+    cursor: grab;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+  }
+
+  #priorities li .text {
+    flex: 1;
+    color: #ccc;
+    outline: none;
+    border: none;
+    background: none;
+    font: inherit;
+    min-width: 0;
+  }
+
+  #priorities li .text:empty::before {
+    content: attr(data-placeholder);
+    color: #333;
+  }
+
+  #priorities li.done .text {
+    text-decoration: line-through;
+    color: #444;
+  }
+
+  #priorities li .check {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #333;
+    border-radius: 3px;
+    margin-right: 0.6rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: transparent;
+  }
+
+  #priorities li.done .check {
+    border-color: #444;
+    color: #555;
+  }
+
+  #priorities li .delete {
+    color: #333;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  #priorities li:hover .delete {
+    opacity: 1;
+  }
+
+  #priorities li .delete:hover {
+    color: #666;
+  }
+
+  #add-btn {
+    background: none;
+    border: 1px solid #1e1e1e;
+    color: #444;
+    font: inherit;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    margin-bottom: 4rem;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  #add-btn:hover {
+    color: #777;
+    border-color: #333;
+  }
+
+  .quote {
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: #706f6f;
+    font-style: italic;
+    border-left: 2px solid #2a2a2a;
+    padding-left: 1rem;
+  }
+
+  .quote .attr {
+    display: block;
+    margin-top: 0.5rem;
+    font-style: normal;
+    font-size: 0.7rem;
+    color: #504f4f;
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="date" id="date"></p>
+
+  <h2>Today's Priorities</h2>
+  <ul id="priorities"></ul>
+  <button id="add-btn">+ add</button>
+
+  <div class="quote" id="quote"></div>
+</main>
+
+<script>
+  // Date
+  const d = new Date();
+  const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('date').textContent = d.toLocaleDateString('en-US', opts);
+
+  // Quote
+  const quotes = [
+    ["You have power over your mind, not outside events. Realize this, and you will find strength.", "Marcus Aurelius"],
+    ["Waste no more time arguing about what a good man should be. Be one.", "Marcus Aurelius"],
+    ["The happiness of your life depends upon the quality of your thoughts.", "Marcus Aurelius"],
+    ["Very little is needed to make a happy life; it is all within yourself, in your way of thinking.", "Marcus Aurelius"],
+    ["We suffer more often in imagination than in reality.", "Seneca"],
+    ["It is not that we have a short time to live, but that we waste a great deal of it.", "Seneca"],
+    ["Luck is what happens when preparation meets opportunity.", "Seneca"],
+    ["Difficulty strengthens the mind, as labor does the body.", "Seneca"],
+    ["Man is not worried by real problems so much as by his imagined anxieties about real problems.", "Epictetus"],
+    ["First say to yourself what you would be; and then do what you have to do.", "Epictetus"],
+    ["It's not what happens to you, but how you react to it that matters.", "Epictetus"],
+    ["No man is free who is not master of himself.", "Epictetus"],
+  ];
+  const q = quotes[Math.floor(Math.random() * quotes.length)];
+  document.getElementById('quote').innerHTML = q[0] + '<span class="attr">' + q[1] + '</span>';
+
+  // Priorities
+  const list = document.getElementById('priorities');
+  let dragEl = null;
+
+  function createItem(text) {
+    const li = document.createElement('li');
+    li.draggable = true;
+    li.innerHTML =
+      '<span class="drag-handle">\u2261</span>' +
+      '<span class="check">\u2713</span>' +
+      '<span class="text" contenteditable="true" data-placeholder="..."></span>' +
+      '<span class="delete">\u00d7</span>';
+    li.querySelector('.text').textContent = text || '';
+
+    li.querySelector('.check').addEventListener('click', function() {
+      li.classList.toggle('done');
+      save();
+    });
+
+    li.querySelector('.delete').addEventListener('click', function() {
+      li.remove();
+      save();
+    });
+
+    li.querySelector('.text').addEventListener('input', save);
+
+    li.addEventListener('dragstart', function(e) {
+      dragEl = li;
+      li.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    li.addEventListener('dragend', function() {
+      li.classList.remove('dragging');
+      dragEl = null;
+      save();
+    });
+
+    li.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      if (dragEl && dragEl !== li) {
+        const rect = li.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        if (e.clientY < mid) {
+          list.insertBefore(dragEl, li);
+        } else {
+          list.insertBefore(dragEl, li.nextSibling);
+        }
+      }
+    });
+
+    return li;
+  }
+
+  function save() {
+    const items = [...list.querySelectorAll('li')].map(li => ({
+      text: li.querySelector('.text').textContent,
+      done: li.classList.contains('done')
+    }));
+    localStorage.setItem('priorities', JSON.stringify(items));
+  }
+
+  function load() {
+    const data = localStorage.getItem('priorities');
+    if (data) {
+      JSON.parse(data).forEach(item => {
+        const li = createItem(item.text);
+        if (item.done) li.classList.add('done');
+        list.appendChild(li);
+      });
+    } else {
+      for (let i = 0; i < 3; i++) list.appendChild(createItem(''));
+    }
+  }
+
+  load();
+
+  document.getElementById('add-btn').addEventListener('click', function() {
+    const item = createItem('');
+    list.appendChild(item);
+    item.querySelector('.text').focus();
+    save();
+  });
+</script>
+</body>
+</html>
