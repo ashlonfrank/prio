@@ -145,6 +145,23 @@
     color: #555;
   }
 
+  #priorities li.migrated {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  #priorities li.migrated .text {
+    text-decoration: none;
+    color: #555;
+  }
+
+  #priorities li.migrated .migrated-label {
+    font-size: 0.65rem;
+    color: #444;
+    margin-left: 0.4rem;
+    white-space: nowrap;
+  }
+
   #priorities li .delete {
     color: #444;
     cursor: pointer;
@@ -289,6 +306,17 @@
 
     li.querySelector('.text').addEventListener('input', save);
 
+    li.setMigrated = function() {
+      li.classList.add('migrated');
+      li.draggable = false;
+      li.querySelector('.text').contentEditable = 'false';
+      const label = document.createElement('span');
+      label.className = 'migrated-label';
+      label.textContent = 'moved \u2192';
+      li.querySelector('.text').after(label);
+      li.querySelector('.delete').remove();
+    };
+
     // Desktop drag
     li.addEventListener('dragstart', function(e) {
       dragEl = li;
@@ -367,6 +395,7 @@
       JSON.parse(data).forEach(item => {
         const li = createItem(item.text);
         if (item.done) li.classList.add('done');
+        if (item.migrated) li.setMigrated();
         list.appendChild(li);
       });
     } else {
@@ -381,6 +410,50 @@
     localStorage.removeItem('priorities');
   }
 
+  // Move unchecked items from past dates to today
+  function migrateUnchecked() {
+    const today = todayStr();
+    const todayKey = toKey(today);
+
+    const pastKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('prio-') && key.slice(5) < today) {
+        pastKeys.push(key);
+      }
+    }
+    if (pastKeys.length === 0) return;
+
+    let todayItems = [];
+    const existing = localStorage.getItem(todayKey);
+    if (existing) todayItems = JSON.parse(existing);
+
+    let migrated = false;
+
+    pastKeys.forEach(key => {
+      const items = JSON.parse(localStorage.getItem(key));
+      const unchecked = items.filter(item => !item.done && !item.migrated && item.text.trim() !== '');
+
+      if (unchecked.length > 0) {
+        todayItems = [...unchecked, ...todayItems];
+        migrated = true;
+        // Mark them as migrated in the past date's data
+        const updated = items.map(item => {
+          if (!item.done && !item.migrated && item.text.trim() !== '') {
+            return { ...item, migrated: true };
+          }
+          return item;
+        });
+        localStorage.setItem(key, JSON.stringify(updated));
+      }
+    });
+
+    if (migrated) {
+      localStorage.setItem(todayKey, JSON.stringify(todayItems));
+    }
+  }
+
+  migrateUnchecked();
   loadDate(activeDate);
 
   document.getElementById('add-btn').addEventListener('click', function() {
