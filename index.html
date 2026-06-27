@@ -38,7 +38,7 @@
 
   .date-wrapper {
     position: relative;
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
     cursor: pointer;
     display: inline-block;
   }
@@ -73,36 +73,44 @@
     opacity: 0;
   }
 
-  h2 {
+  .list-section {
+    margin-bottom: 2rem;
+  }
+
+  .list-section h2 {
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #777;
+    margin-bottom: 0.25rem;
   }
 
+  .list-section[data-list="do"] h2 { color: #999; }
+  .list-section[data-list="watch"] h2 { color: #8a7a5a; }
+  .list-section[data-list="later"] h2 { color: #555; }
 
-  #priorities {
+  .prio-list {
     list-style: none;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
-  #priorities li {
+  .prio-list li {
     display: flex;
     align-items: center;
-    padding: 0.75rem 0;
+    padding: 0.65rem 0;
     border-bottom: 1px solid #1e1e1e;
     font-size: 0.95rem;
     cursor: grab;
     user-select: none;
     touch-action: none;
+    position: relative;
   }
 
-  #priorities li.dragging {
+  .prio-list li.dragging {
     opacity: 0.3;
   }
 
-  #priorities li .drag-handle {
+  .prio-list li .drag-handle {
     color: #333;
     margin-right: 0.6rem;
     cursor: grab;
@@ -111,7 +119,7 @@
     padding: 0.25rem 0.15rem;
   }
 
-  #priorities li .text {
+  .prio-list li .text {
     flex: 1;
     color: #ccc;
     outline: none;
@@ -121,17 +129,17 @@
     min-width: 0;
   }
 
-  #priorities li .text:empty::before {
+  .prio-list li .text:empty::before {
     content: attr(data-placeholder);
     color: #333;
   }
 
-  #priorities li.done .text {
+  .prio-list li.done .text {
     text-decoration: line-through;
     color: #444;
   }
 
-  #priorities li .check {
+  .prio-list li .check {
     width: 20px;
     height: 20px;
     border: 1px solid #333;
@@ -146,63 +154,102 @@
     color: transparent;
   }
 
-  #priorities li.done .check {
+  .prio-list li.done .check {
     border-color: #444;
     color: #555;
   }
 
-  #priorities li.migrated {
+  .item-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .prio-list li .move-btn,
+  .prio-list li .delete {
+    color: #444;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.25rem 0.35rem;
+  }
+
+  @media (hover: hover) {
+    .prio-list li .move-btn,
+    .prio-list li .delete {
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .prio-list li:hover .move-btn,
+    .prio-list li:hover .delete {
+      opacity: 1;
+    }
+    .prio-list li .move-btn:hover,
+    .prio-list li .delete:hover {
+      color: #666;
+    }
+  }
+
+  .move-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
+    z-index: 10;
+    min-width: 100px;
+    overflow: hidden;
+  }
+
+  .move-menu button {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    color: #999;
+    font: inherit;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+
+  .move-menu button:hover {
+    background: #222;
+    color: #ccc;
+  }
+
+  .prio-list li.migrated {
     opacity: 0.35;
     pointer-events: none;
   }
 
-  #priorities li.migrated .text {
+  .prio-list li.migrated .text {
     text-decoration: none;
     color: #555;
   }
 
-  #priorities li.migrated .migrated-label {
+  .prio-list li.migrated .migrated-label {
     font-size: 0.65rem;
     color: #444;
     margin-left: 0.4rem;
     white-space: nowrap;
   }
 
-  #priorities li .delete {
-    color: #444;
-    cursor: pointer;
-    margin-left: 0.5rem;
-    font-size: 0.9rem;
-    flex-shrink: 0;
-    padding: 0.25rem 0.35rem;
-  }
-
-  @media (hover: hover) {
-    #priorities li .delete {
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
-    #priorities li:hover .delete {
-      opacity: 1;
-    }
-    #priorities li .delete:hover {
-      color: #666;
-    }
-  }
-
-  #add-btn {
+  .add-btn {
     background: none;
     border: 1px solid #1e1e1e;
     color: #444;
     font: inherit;
-    font-size: 0.85rem;
-    padding: 0.55rem 1rem;
+    font-size: 0.8rem;
+    padding: 0.45rem 0.85rem;
     cursor: pointer;
-    margin-bottom: 4rem;
     transition: color 0.15s, border-color 0.15s;
   }
 
-  #add-btn:hover {
+  .add-btn:hover {
     color: #777;
     border-color: #333;
   }
@@ -214,6 +261,7 @@
     font-style: italic;
     border-left: 2px solid #2a2a2a;
     padding-left: 1rem;
+    margin-top: 2rem;
   }
 
   .quote .attr {
@@ -232,30 +280,53 @@
     <input type="date" id="date-pick">
   </div>
 
-  <h2>Today's Priorities</h2>
-  <ul id="priorities"></ul>
-  <button id="add-btn">+ add</button>
+  <section class="list-section" data-list="do">
+    <h2>Do</h2>
+    <ul class="prio-list" id="list-do"></ul>
+    <button class="add-btn" data-list="do">+ add</button>
+  </section>
+
+  <section class="list-section" data-list="watch">
+    <h2>Watch</h2>
+    <ul class="prio-list" id="list-watch"></ul>
+    <button class="add-btn" data-list="watch">+ add</button>
+  </section>
+
+  <section class="list-section" data-list="later">
+    <h2>Later</h2>
+    <ul class="prio-list" id="list-later"></ul>
+    <button class="add-btn" data-list="later">+ add</button>
+  </section>
 
   <div class="quote" id="quote"></div>
 </main>
 
 <script>
-  // Helpers
-  function toKey(dateStr) { return 'prio-' + dateStr; }
+  // --- Helpers ---
   function todayStr() {
-    const t = new Date();
+    var t = new Date();
     return t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
   }
 
-  // Date
-  const dateLabel = document.getElementById('date');
-  const datePick = document.getElementById('date-pick');
-  const fmtOpts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  let activeDate = todayStr();
+  function doKey(dateStr) { return 'prio-do-' + dateStr; }
+  var WATCH_KEY = 'prio-watch';
+  var LATER_KEY = 'prio-later';
+
+  function storageKey(listName, dateStr) {
+    if (listName === 'do') return doKey(dateStr);
+    if (listName === 'watch') return WATCH_KEY;
+    return LATER_KEY;
+  }
+
+  // --- Date ---
+  var dateLabel = document.getElementById('date');
+  var datePick = document.getElementById('date-pick');
+  var fmtOpts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  var activeDate = todayStr();
 
   function displayDate(dateStr) {
-    const parts = dateStr.split('-');
-    const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+    var parts = dateStr.split('-');
+    var dt = new Date(parts[0], parts[1] - 1, parts[2]);
     dateLabel.textContent = dt.toLocaleDateString('en-US', fmtOpts);
   }
 
@@ -265,11 +336,11 @@
   datePick.addEventListener('change', function() {
     activeDate = datePick.value;
     displayDate(activeDate);
-    loadDate(activeDate);
+    loadList('do');
   });
 
-  // Quote
-  const quotes = [
+  // --- Quote ---
+  var quotes = [
     ["You have power over your mind, not outside events. Realize this, and you will find strength.", "Marcus Aurelius"],
     ["Waste no more time arguing about what a good man should be. Be one.", "Marcus Aurelius"],
     ["The happiness of your life depends upon the quality of your thoughts.", "Marcus Aurelius"],
@@ -283,76 +354,133 @@
     ["It's not what happens to you, but how you react to it that matters.", "Epictetus"],
     ["No man is free who is not master of himself.", "Epictetus"],
   ];
-  const q = quotes[Math.floor(Math.random() * quotes.length)];
+  var q = quotes[Math.floor(Math.random() * quotes.length)];
   document.getElementById('quote').innerHTML = q[0] + '<span class="attr">' + q[1] + '</span>';
 
-  // Priorities
-  const list = document.getElementById('priorities');
-  let dragEl = null;
+  // --- Lists ---
+  var listEls = {
+    do: document.getElementById('list-do'),
+    watch: document.getElementById('list-watch'),
+    later: document.getElementById('list-later'),
+  };
 
-  function createItem(text) {
-    const li = document.createElement('li');
+  var LIST_LABELS = { do: 'Do', watch: 'Watch', later: 'Later' };
+  var dragEl = null;
+  var dragList = null;
+  var openMenu = null;
+
+  document.addEventListener('click', function(e) {
+    if (openMenu && !openMenu.contains(e.target) && !e.target.classList.contains('move-btn')) {
+      openMenu.remove();
+      openMenu = null;
+    }
+  });
+
+  function createItem(text, listName) {
+    var li = document.createElement('li');
     li.draggable = true;
+    li.dataset.list = listName;
+
     li.innerHTML =
       '<span class="drag-handle">\u2261</span>' +
       '<span class="check">\u2713</span>' +
       '<span class="text" contenteditable="true" data-placeholder="..."></span>' +
-      '<span class="delete">\u00d7</span>';
+      '<span class="item-actions">' +
+        '<span class="move-btn">\u2192</span>' +
+        '<span class="delete">\u00d7</span>' +
+      '</span>';
+
     li.querySelector('.text').textContent = text || '';
 
     li.querySelector('.check').addEventListener('click', function() {
       li.classList.toggle('done');
-      save();
+      save(li.dataset.list);
     });
 
     li.querySelector('.delete').addEventListener('click', function() {
+      var ln = li.dataset.list;
       li.remove();
-      save();
+      save(ln);
     });
 
-    li.querySelector('.text').addEventListener('input', save);
+    li.querySelector('.text').addEventListener('input', function() {
+      save(li.dataset.list);
+    });
 
+    // Move menu
+    li.querySelector('.move-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (openMenu) { openMenu.remove(); openMenu = null; }
+
+      var menu = document.createElement('div');
+      menu.className = 'move-menu';
+
+      Object.keys(LIST_LABELS).forEach(function(target) {
+        if (target === li.dataset.list) return;
+        var btn = document.createElement('button');
+        btn.textContent = '\u2192 ' + LIST_LABELS[target];
+        btn.addEventListener('click', function(ev) {
+          ev.stopPropagation();
+          moveItem(li, target);
+          menu.remove();
+          openMenu = null;
+        });
+        menu.appendChild(btn);
+      });
+
+      li.querySelector('.item-actions').appendChild(menu);
+      openMenu = menu;
+    });
+
+    // Migrated state
     li.setMigrated = function() {
       li.classList.add('migrated');
       li.draggable = false;
       li.querySelector('.text').contentEditable = 'false';
-      const label = document.createElement('span');
+      var label = document.createElement('span');
       label.className = 'migrated-label';
       label.textContent = 'moved \u2192';
       li.querySelector('.text').after(label);
-      li.querySelector('.delete').remove();
+      li.querySelector('.item-actions').remove();
     };
 
     // Desktop drag
     li.addEventListener('dragstart', function(e) {
       dragEl = li;
+      dragList = li.dataset.list;
       li.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
     });
 
     li.addEventListener('dragend', function() {
       li.classList.remove('dragging');
+      var newList = li.closest('.prio-list').id.replace('list-', '');
+      li.dataset.list = newList;
+      save(newList);
+      if (dragList !== newList) save(dragList);
       dragEl = null;
-      save();
+      dragList = null;
     });
 
     li.addEventListener('dragover', function(e) {
       e.preventDefault();
       if (dragEl && dragEl !== li) {
-        const rect = li.getBoundingClientRect();
-        const mid = rect.top + rect.height / 2;
+        var targetUl = li.closest('.prio-list');
+        var rect = li.getBoundingClientRect();
+        var mid = rect.top + rect.height / 2;
         if (e.clientY < mid) {
-          list.insertBefore(dragEl, li);
+          targetUl.insertBefore(dragEl, li);
         } else {
-          list.insertBefore(dragEl, li.nextSibling);
+          targetUl.insertBefore(dragEl, li.nextSibling);
         }
       }
     });
 
-    // Touch drag (via handle only)
-    const handle = li.querySelector('.drag-handle');
+    // Touch drag
+    var handle = li.querySelector('.drag-handle');
     handle.addEventListener('touchstart', function(e) {
       dragEl = li;
+      dragList = li.dataset.list;
       li.classList.add('dragging');
       e.preventDefault();
     }, { passive: false });
@@ -360,17 +488,24 @@
     handle.addEventListener('touchmove', function(e) {
       if (!dragEl) return;
       e.preventDefault();
-      const touch = e.touches[0];
-      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      var touch = e.touches[0];
+      var target = document.elementFromPoint(touch.clientX, touch.clientY);
       if (!target) return;
-      const targetLi = target.closest('#priorities li');
+      var targetLi = target.closest('.prio-list li');
       if (targetLi && targetLi !== dragEl) {
-        const rect = targetLi.getBoundingClientRect();
-        const mid = rect.top + rect.height / 2;
+        var targetUl = targetLi.closest('.prio-list');
+        var rect = targetLi.getBoundingClientRect();
+        var mid = rect.top + rect.height / 2;
         if (touch.clientY < mid) {
-          list.insertBefore(dragEl, targetLi);
+          targetUl.insertBefore(dragEl, targetLi);
         } else {
-          list.insertBefore(dragEl, targetLi.nextSibling);
+          targetUl.insertBefore(dragEl, targetLi.nextSibling);
+        }
+      } else if (!targetLi) {
+        var section = target.closest('.list-section');
+        if (section) {
+          var targetUl = listEls[section.dataset.list];
+          targetUl.appendChild(dragEl);
         }
       }
     }, { passive: false });
@@ -378,75 +513,116 @@
     handle.addEventListener('touchend', function() {
       if (dragEl) {
         dragEl.classList.remove('dragging');
+        var newList = dragEl.closest('.prio-list').id.replace('list-', '');
+        dragEl.dataset.list = newList;
+        save(newList);
+        if (dragList !== newList) save(dragList);
         dragEl = null;
-        save();
+        dragList = null;
       }
     });
 
     return li;
   }
 
-  function save() {
-    const items = [...list.querySelectorAll('li')].map(li => ({
-      text: li.querySelector('.text').textContent,
-      done: li.classList.contains('done')
-    }));
-    localStorage.setItem(toKey(activeDate), JSON.stringify(items));
+  function moveItem(li, toList) {
+    var fromList = li.dataset.list;
+    var text = li.querySelector('.text').textContent;
+    var done = li.classList.contains('done');
+    li.remove();
+    save(fromList);
+
+    var newLi = createItem(text, toList);
+    if (done) newLi.classList.add('done');
+    listEls[toList].appendChild(newLi);
+    save(toList);
   }
 
-  function loadDate(dateStr) {
-    list.innerHTML = '';
-    const data = localStorage.getItem(toKey(dateStr));
+  function save(listName) {
+    var ul = listEls[listName];
+    var items = Array.from(ul.querySelectorAll('li')).map(function(li) {
+      var obj = {
+        text: li.querySelector('.text').textContent,
+        done: li.classList.contains('done'),
+      };
+      if (li.classList.contains('migrated')) obj.migrated = true;
+      return obj;
+    });
+    localStorage.setItem(storageKey(listName, activeDate), JSON.stringify(items));
+  }
+
+  function loadList(listName) {
+    var ul = listEls[listName];
+    ul.innerHTML = '';
+    var key = storageKey(listName, activeDate);
+    var data = localStorage.getItem(key);
+
     if (data) {
-      JSON.parse(data).forEach(item => {
-        const li = createItem(item.text);
+      JSON.parse(data).forEach(function(item) {
+        var li = createItem(item.text, listName);
         if (item.done) li.classList.add('done');
         if (item.migrated) li.setMigrated();
-        list.appendChild(li);
+        ul.appendChild(li);
       });
-    } else {
-      for (let i = 0; i < 3; i++) list.appendChild(createItem(''));
     }
   }
 
-  // Migrate old single-key data to today's date key
-  const legacy = localStorage.getItem('priorities');
-  if (legacy && !localStorage.getItem(toKey(todayStr()))) {
-    localStorage.setItem(toKey(todayStr()), legacy);
-    localStorage.removeItem('priorities');
-  }
+  // --- Migration from old format ---
+  (function migrateOldFormat() {
+    var legacy = localStorage.getItem('priorities');
+    var today = todayStr();
+    if (legacy && !localStorage.getItem(doKey(today))) {
+      localStorage.setItem(doKey(today), legacy);
+      localStorage.removeItem('priorities');
+    }
 
-  // Move unchecked items from past dates to today
+    for (var i = localStorage.length - 1; i >= 0; i--) {
+      var key = localStorage.key(i);
+      if (key && key.startsWith('prio-') && !key.startsWith('prio-do-') && key !== WATCH_KEY && key !== LATER_KEY) {
+        var dateStr = key.slice(5);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+          var newKey = doKey(dateStr);
+          if (!localStorage.getItem(newKey)) {
+            localStorage.setItem(newKey, localStorage.getItem(key));
+          }
+          localStorage.removeItem(key);
+        }
+      }
+    }
+  })();
+
+  // Migrate unchecked Do items from past dates to today
   function migrateUnchecked() {
-    const today = todayStr();
-    const todayKey = toKey(today);
+    var today = todayStr();
+    var todayKey = doKey(today);
 
-    const pastKeys = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('prio-') && key.slice(5) < today) {
+    var pastKeys = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i);
+      if (key && key.startsWith('prio-do-') && key.slice(8) < today) {
         pastKeys.push(key);
       }
     }
     if (pastKeys.length === 0) return;
 
-    let todayItems = [];
-    const existing = localStorage.getItem(todayKey);
+    var todayItems = [];
+    var existing = localStorage.getItem(todayKey);
     if (existing) todayItems = JSON.parse(existing);
 
-    let migrated = false;
+    var migrated = false;
 
-    pastKeys.forEach(key => {
-      const items = JSON.parse(localStorage.getItem(key));
-      const unchecked = items.filter(item => !item.done && !item.migrated && item.text.trim() !== '');
+    pastKeys.forEach(function(key) {
+      var items = JSON.parse(localStorage.getItem(key));
+      var unchecked = items.filter(function(item) {
+        return !item.done && !item.migrated && item.text.trim() !== '';
+      });
 
       if (unchecked.length > 0) {
-        todayItems = [...unchecked, ...todayItems];
+        todayItems = unchecked.concat(todayItems);
         migrated = true;
-        // Mark them as migrated in the past date's data
-        const updated = items.map(item => {
+        var updated = items.map(function(item) {
           if (!item.done && !item.migrated && item.text.trim() !== '') {
-            return { ...item, migrated: true };
+            return { text: item.text, done: item.done, migrated: true };
           }
           return item;
         });
@@ -460,16 +636,36 @@
   }
 
   migrateUnchecked();
-  loadDate(activeDate);
+
+  // Load all lists
+  loadList('do');
+  loadList('watch');
+  loadList('later');
+
+  // Allow dropping into empty lists or below items
+  document.querySelectorAll('.list-section').forEach(function(section) {
+    section.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      if (!dragEl) return;
+      if (!e.target.closest('.prio-list li')) {
+        var ul = listEls[section.dataset.list];
+        ul.appendChild(dragEl);
+      }
+    });
+  });
+
+  // Add buttons
+  document.querySelectorAll('.add-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var listName = btn.dataset.list;
+      var item = createItem('', listName);
+      listEls[listName].appendChild(item);
+      item.querySelector('.text').focus();
+      save(listName);
+    });
+  });
 
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
-
-  document.getElementById('add-btn').addEventListener('click', function() {
-    const item = createItem('');
-    list.appendChild(item);
-    item.querySelector('.text').focus();
-    save();
-  });
 </script>
 </body>
 </html>
