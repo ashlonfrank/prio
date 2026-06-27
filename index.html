@@ -164,7 +164,6 @@
     position: relative;
   }
 
-  .prio-list li .move-btn,
   .prio-list li .delete {
     color: #444;
     cursor: pointer;
@@ -173,50 +172,16 @@
   }
 
   @media (hover: hover) {
-    .prio-list li .move-btn,
     .prio-list li .delete {
       opacity: 0;
       transition: opacity 0.15s;
     }
-    .prio-list li:hover .move-btn,
     .prio-list li:hover .delete {
       opacity: 1;
     }
-    .prio-list li .move-btn:hover,
     .prio-list li .delete:hover {
       color: #666;
     }
-  }
-
-  .move-menu {
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
-    border-radius: 4px;
-    z-index: 10;
-    min-width: 100px;
-    overflow: hidden;
-  }
-
-  .move-menu button {
-    display: block;
-    width: 100%;
-    background: none;
-    border: none;
-    color: #999;
-    font: inherit;
-    font-size: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    text-align: left;
-    cursor: pointer;
-    letter-spacing: 0.04em;
-  }
-
-  .move-menu button:hover {
-    background: #222;
-    color: #ccc;
   }
 
   .prio-list li.migrated {
@@ -365,14 +330,6 @@
   var LIST_LABELS = { do: 'Do', watch: 'Watch', later: 'Later' };
   var dragEl = null;
   var dragList = null;
-  var openMenu = null;
-
-  document.addEventListener('click', function(e) {
-    if (openMenu && !openMenu.contains(e.target) && !e.target.classList.contains('move-btn')) {
-      openMenu.remove();
-      openMenu = null;
-    }
-  });
 
   function createItem(text, listName) {
     var li = document.createElement('li');
@@ -384,7 +341,6 @@
       '<span class="check">\u2713</span>' +
       '<span class="text" contenteditable="true" data-placeholder="..."></span>' +
       '<span class="item-actions">' +
-        '<span class="move-btn">\u2192</span>' +
         '<span class="delete">\u00d7</span>' +
       '</span>';
 
@@ -403,31 +359,6 @@
 
     li.querySelector('.text').addEventListener('input', function() {
       save(li.dataset.list);
-    });
-
-    // Move menu
-    li.querySelector('.move-btn').addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (openMenu) { openMenu.remove(); openMenu = null; }
-
-      var menu = document.createElement('div');
-      menu.className = 'move-menu';
-
-      Object.keys(LIST_LABELS).forEach(function(target) {
-        if (target === li.dataset.list) return;
-        var btn = document.createElement('button');
-        btn.textContent = '\u2192 ' + LIST_LABELS[target];
-        btn.addEventListener('click', function(ev) {
-          ev.stopPropagation();
-          moveItem(li, target);
-          menu.remove();
-          openMenu = null;
-        });
-        menu.appendChild(btn);
-      });
-
-      li.querySelector('.item-actions').appendChild(menu);
-      openMenu = menu;
     });
 
     // Migrated state
@@ -521,19 +452,6 @@
     });
 
     return li;
-  }
-
-  function moveItem(li, toList) {
-    var fromList = li.dataset.list;
-    var text = li.querySelector('.text').textContent;
-    var done = li.classList.contains('done');
-    li.remove();
-    save(fromList);
-
-    var newLi = createItem(text, toList);
-    if (done) newLi.classList.add('done');
-    listEls[toList].appendChild(newLi);
-    save(toList);
   }
 
   function save(listName) {
