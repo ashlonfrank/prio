@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goals</title>
+<meta name="theme-color" content="#111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.svg">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #111;
+    color: #c8c8c8;
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  main {
+    max-width: 480px;
+    width: 100%;
+    padding: 2rem;
+    padding-top: max(2rem, env(safe-area-inset-top));
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+    padding-left: max(1.25rem, env(safe-area-inset-left));
+    padding-right: max(1.25rem, env(safe-area-inset-right));
+  }
+
+  .quarter-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 3rem;
+  }
+
+  .quarter-nav button {
+    background: none;
+    border: none;
+    color: #444;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.15s;
+  }
+
+  .quarter-nav button:hover {
+    color: #777;
+  }
+
+  .quarter-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .section {
+    margin-bottom: 2.5rem;
+  }
+
+  .section h2 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #777;
+    margin-bottom: 0.25rem;
+  }
+
+  .section ul {
+    list-style: none;
+  }
+
+  .section li {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #1e1e1e;
+    font-size: 0.95rem;
+  }
+
+  .section li .num {
+    color: #333;
+    margin-right: 0.6rem;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .section li .text {
+    flex: 1;
+    color: #ccc;
+    outline: none;
+    border: none;
+    background: none;
+    font: inherit;
+    min-width: 0;
+  }
+
+  .section li .text:empty::before {
+    content: attr(data-placeholder);
+    color: #333;
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="quarter-nav">
+    <button id="prev-q">&larr;</button>
+    <span class="quarter-label" id="quarter-label"></span>
+    <button id="next-q">&rarr;</button>
+  </div>
+
+  <div class="section">
+    <h2>Work</h2>
+    <ul id="work-goals"></ul>
+  </div>
+
+  <div class="section">
+    <h2>Life</h2>
+    <ul id="life-goals"></ul>
+  </div>
+</main>
+
+<script>
+  // Quarter helpers
+  function currentQuarter() {
+    const now = new Date();
+    return { q: Math.ceil((now.getMonth() + 1) / 3), y: now.getFullYear() % 100 };
+  }
+
+  function qKey(q, y) { return 'goals-q' + q + '-' + y; }
+  function qLabel(q, y) { return 'Q' + q + ' / ' + String(y).padStart(2, '0'); }
+
+  function shiftQ(q, y, dir) {
+    q += dir;
+    if (q > 4) { q = 1; y++; }
+    if (q < 1) { q = 4; y--; }
+    return { q, y };
+  }
+
+  // State
+  let active = currentQuarter();
+
+  const label = document.getElementById('quarter-label');
+  const workList = document.getElementById('work-goals');
+  const lifeList = document.getElementById('life-goals');
+
+  function displayQuarter() {
+    label.textContent = qLabel(active.q, active.y);
+  }
+
+  // Build a goal row
+  function createGoal(num, text) {
+    const li = document.createElement('li');
+    li.innerHTML =
+      '<span class="num">' + num + '</span>' +
+      '<span class="text" contenteditable="true" data-placeholder="..."></span>';
+    li.querySelector('.text').textContent = text || '';
+    li.querySelector('.text').addEventListener('input', save);
+    return li;
+  }
+
+  // Save
+  function save() {
+    const data = {
+      work: [...workList.querySelectorAll('.text')].map(el => el.textContent),
+      life: [...lifeList.querySelectorAll('.text')].map(el => el.textContent)
+    };
+    localStorage.setItem(qKey(active.q, active.y), JSON.stringify(data));
+  }
+
+  // Load
+  function load() {
+    workList.innerHTML = '';
+    lifeList.innerHTML = '';
+    const raw = localStorage.getItem(qKey(active.q, active.y));
+    const data = raw ? JSON.parse(raw) : { work: ['', '', ''], life: ['', '', ''] };
+    for (let i = 0; i < 3; i++) {
+      workList.appendChild(createGoal(i + 1, data.work[i] || ''));
+      lifeList.appendChild(createGoal(i + 1, data.life[i] || ''));
+    }
+  }
+
+  // Nav
+  document.getElementById('prev-q').addEventListener('click', function() {
+    active = shiftQ(active.q, active.y, -1);
+    displayQuarter();
+    load();
+  });
+
+  document.getElementById('next-q').addEventListener('click', function() {
+    active = shiftQ(active.q, active.y, 1);
+    displayQuarter();
+    load();
+  });
+
+  // Init
+  displayQuarter();
+  load();
+</script>
+</body>
+</html>
